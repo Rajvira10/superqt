@@ -353,3 +353,24 @@ def test_drag_overlapping_handles(qtbot, cls, orientation, inverted, values):
     else:
         assert result[0] < values[0]
         assert result[1:] == values[1:]
+
+
+def test_set_range_with_nonlist_value_does_not_emit_valuechanged(qtbot):
+    sld = QRangeSlider()
+    sld.setRange(0, 25)
+    qtbot.addWidget(sld)
+
+    mock = Mock()
+    sld.valueChanged.connect(mock)
+
+    with qtbot.waitSignal(sld.valueChanged):
+        sld.setValue((0.0, 25.0))  # tuple, not list!
+
+    mock.assert_called_once()
+    mock.reset_mock()
+
+    with qtbot.waitSignal(sld.rangeChanged):
+        sld.setRange(0, 255)
+
+    mock.assert_not_called()
+    mock.reset_mock()
